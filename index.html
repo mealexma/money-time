@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>💸 Money Time</title>
+<!-- Open full-screen when pinned to the phone home screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Money Time">
+<meta name="theme-color" content="#ffd6e8">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Crect width='180' height='180' rx='40' fill='%23ffd6e8'/%3E%3Ctext x='90' y='130' font-size='110' text-anchor='middle'%3E%F0%9F%92%B8%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #5a3d52;
+    --soft: #9b7d92;
+    --pop: #ff5d8f;
+    --pop-2: #ffa24b;
+    --mint: #2bd9b0;
+    --card: rgba(255,255,255,.72);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { height: 100%; }
+  body {
+    font-family: "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 15% 10%, #ffe7a8 0%, transparent 45%),
+      radial-gradient(circle at 85% 15%, #b5f0ff 0%, transparent 45%),
+      radial-gradient(circle at 50% 100%, #ffc6e0 0%, transparent 55%),
+      linear-gradient(160deg, #fff4d6 0%, #ffd6e8 55%, #d9c7ff 100%);
+    background-attachment: fixed;
+    /* Lock to the screen: no scroll, no rubber-band bounce on iOS */
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+  }
+
+  /* drifting bubbles in the background */
+  .bubble { position: fixed; border-radius: 50%; opacity: .35; filter: blur(1px); pointer-events: none; animation: float 9s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-22px) } }
+
+  /* Mobile-first: the card IS the screen, edge to edge */
+  .card {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+    padding:
+      calc(env(safe-area-inset-top) + 26px)
+      calc(env(safe-area-inset-right) + 26px)
+      calc(env(safe-area-inset-bottom) + 26px)
+      calc(env(safe-area-inset-left) + 26px);
+  }
+
+  /* On bigger screens (tablet/desktop), float it as a rounded glass card */
+  @media (min-width: 600px) {
+    body { align-items: center; }
+    .card {
+      width: 400px;
+      flex: none;
+      gap: 4px;
+      background: var(--card);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 2px solid rgba(255,255,255,.85);
+      border-radius: 34px;
+      padding: 34px 26px 30px;
+      box-shadow: 0 22px 50px rgba(173, 110, 150, .35);
+    }
+  }
+
+  h1 {
+    font-family: "Baloo 2", cursive;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--pop);
+    margin-bottom: 14px;
+  }
+
+  .amount {
+    font-family: "Baloo 2", cursive;
+    font-size: clamp(2.8rem, 14vw, 4.4rem);
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(120deg, var(--pop) 0%, var(--pop-2) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-variant-numeric: tabular-nums;
+    word-break: break-word;
+  }
+  .gross { color: var(--soft); font-size: .9rem; font-weight: 700; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .since { color: var(--soft); font-size: .8rem; font-weight: 600; margin-top: 3px; min-height: 1.2em; }
+
+  .treats { margin-top: 18px; min-height: 3.4em; }
+  .treat-now {
+    font-family: "Baloo 2", cursive;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--ink);
+    min-height: 1.5em;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  .treat-now.fade { opacity: 0; transform: scale(.8); }
+  .treat-next {
+    display: inline-block;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--soft);
+    margin-top: 8px;
+    background: rgba(255,255,255,.6);
+    border-radius: 999px;
+    padding: 5px 13px;
+  }
+
+  .buttons { display: flex; gap: 12px; margin-top: 24px; width: 100%; max-width: 360px; }
+  button {
+    flex: 1;
+    border: none;
+    border-radius: 999px;
+    padding: 15px;
+    font-family: "Baloo 2", cursive;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .08s ease, box-shadow .2s;
+  }
+  button:active { transform: scale(.94); }
+  .start {
+    background: linear-gradient(120deg, var(--pop) 0%, var(--pop-2) 100%);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(255,93,143,.4);
+  }
+  .reset { background: rgba(255,255,255,.75); color: var(--soft); }
+  button:disabled { opacity: .55; }
+
+  .footnote { margin-top: 16px; font-size: .72rem; font-weight: 600; color: var(--soft); line-height: 1.5; }
+</style>
+</head>
+<body>
+  <div class="bubble" style="width:90px;height:90px;left:-20px;top:18%;background:#ffd36e;animation-delay:0s"></div>
+  <div class="bubble" style="width:60px;height:60px;right:8%;top:10%;background:#7fe9ff;animation-delay:1.5s"></div>
+  <div class="bubble" style="width:120px;height:120px;right:-30px;bottom:14%;background:#ff9ec4;animation-delay:.8s"></div>
+  <div class="bubble" style="width:50px;height:50px;left:12%;bottom:10%;background:#c3a8ff;animation-delay:2.2s"></div>
+
+  <div class="card">
+    <h1>💸 ka-ching o'clock</h1>
+    <div class="amount" id="amount">kr 0.00</div>
+    <div class="gross" id="gross"></div>
+    <div class="since" id="since"></div>
+
+    <div class="treats" id="treats">
+      <div class="treat-now" id="treatNow"></div>
+      <div class="treat-next" id="treatNext"></div>
+    </div>
+
+    <div class="buttons">
+      <button class="start" id="startBtn">Let's go! ✨</button>
+      <button class="reset" id="resetBtn">Reset</button>
+    </div>
+
+    <div class="footnote">that's the money in your pocket, growing live 🌱</div>
+  </div>
+
+<script>
+  // Temporary memory: survives a screen-lock or accidental reload,
+  // but vanishes once the tab is closed. Nothing saved long-term.
+  const KEY = "moneyTime";
+
+  // ---- Pay (hardcoded) ----
+  const MONTHLY_GROSS = 45000;   // kr per month
+  const HOURS_PER_WEEK = 35;
+  const TAX_RATE = 0.32;
+  const CURRENCY = "kr";
+
+  const HOURS_PER_MONTH = HOURS_PER_WEEK * 52 / 12;
+  const GROSS_PER_MS = (MONTHLY_GROSS / HOURS_PER_MONTH) / 3600e3;
+  const NET_PER_MS = GROSS_PER_MS * (1 - TAX_RATE);
+
+  const els = {
+    amount: document.getElementById("amount"),
+    gross: document.getElementById("gross"),
+    since: document.getElementById("since"),
+    startBtn: document.getElementById("startBtn"),
+    resetBtn: document.getElementById("resetBtn"),
+    treatNow: document.getElementById("treatNow"),
+    treatNext: document.getElementById("treatNext"),
+  };
+
+  // What you've earned, in net (after-tax) kr — just for fun!
+  const TREATS = [
+    { at: 35,    emoji: "🍪", name: "a cookie!" },
+    { at: 55,    emoji: "☕", name: "a coffee!" },
+    { at: 95,    emoji: "🍦", name: "an ice cream!" },
+    { at: 130,   emoji: "🍜", name: "lunch out!" },
+    { at: 165,   emoji: "🎬", name: "a movie ticket!" },
+    { at: 250,   emoji: "📚", name: "a new book!" },
+    { at: 400,   emoji: "💐", name: "fresh flowers!" },
+    { at: 550,   emoji: "🍷", name: "a fancy dinner!" },
+    { at: 900,   emoji: "💆", name: "a spa day!" },
+    { at: 1500,  emoji: "👗", name: "a whole new outfit!" },
+    { at: 3000,  emoji: "✈️", name: "a weekend away!" },
+    { at: 8000,  emoji: "🏝️", name: "an actual vacation!" },
+  ];
+
+  let lastTreatIndex = -1;
+  let state = load();
+  let raf = null;
+
+  function load() {
+    try { return JSON.parse(sessionStorage.getItem(KEY)) || {}; }
+    catch { return {}; }
+  }
+  function save() { try { sessionStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
+
+  function fmtMoney(n) {
+    return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function money(n) { return CURRENCY + " " + fmtMoney(n); }
+
+  function fmtElapsed(ms) {
+    const s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    const parts = [];
+    if (d) parts.push(d + "d");
+    if (h || d) parts.push(h + "h");
+    parts.push(m + "m");
+    parts.push(sec + "s");
+    return parts.join(" ");
+  }
+
+  function running() { return state.startedAt != null; }
+
+  function updateTreats(net, netPerSec) {
+    let idx = -1;
+    for (let i = 0; i < TREATS.length; i++) {
+      if (net >= TREATS[i].at) idx = i; else break;
+    }
+
+    if (idx >= 0) {
+      const t = TREATS[idx];
+      const text = t.emoji + " That's " + t.name;
+      if (idx !== lastTreatIndex) {
+        els.treatNow.classList.add("fade");
+        setTimeout(() => {
+          els.treatNow.textContent = text;
+          els.treatNow.classList.remove("fade");
+        }, 200);
+        lastTreatIndex = idx;
+      } else if (els.treatNow.textContent !== text) {
+        els.treatNow.textContent = text;
+      }
+    } else {
+      els.treatNow.textContent = "";
+      lastTreatIndex = -1;
+    }
+
+    const next = TREATS[idx + 1];
+    if (next) {
+      const remaining = next.at - net;
+      let eta = "";
+      if (netPerSec > 0) {
+        eta = " · " + fmtElapsed((remaining / netPerSec) * 1000);
+      }
+      els.treatNext.textContent = "soon: " + next.emoji + " " + next.name + eta;
+    } else if (idx >= 0) {
+      els.treatNext.textContent = "🎉 you've earned it all!";
+    } else {
+      const f = TREATS[0];
+      els.treatNext.textContent = "soon: " + f.emoji + " " + f.name;
+    }
+  }
+
+  function tick() {
+    if (!running()) return;
+    const elapsed = Date.now() - state.startedAt;
+    const net = NET_PER_MS * elapsed;
+    const gross = GROSS_PER_MS * elapsed;
+    els.amount.textContent = money(net);
+    els.gross.textContent = "before tax: " + money(gross);
+    els.since.textContent = "growing for " + fmtElapsed(elapsed);
+    updateTreats(net, NET_PER_MS * 1000);
+    raf = requestAnimationFrame(tick);
+  }
+
+  function setRunningUI(isRunning) {
+    els.startBtn.textContent = isRunning ? "cha-ching! 🤑" : "Let's go! ✨";
+    els.startBtn.disabled = isRunning;
+  }
+
+  function start() {
+    lastTreatIndex = -1;
+    state = { startedAt: Date.now() };
+    save();
+    setRunningUI(true);
+    cancelAnimationFrame(raf);
+    tick();
+  }
+
+  function reset() {
+    cancelAnimationFrame(raf);
+    state = {};
+    save();
+    lastTreatIndex = -1;
+    setRunningUI(false);
+    els.amount.textContent = money(0);
+    els.gross.textContent = "";
+    els.since.textContent = "";
+    els.treatNow.textContent = "";
+    els.treatNext.textContent = "";
+  }
+
+  els.startBtn.addEventListener("click", start);
+  els.resetBtn.addEventListener("click", reset);
+
+  // Init
+  if (running()) {
+    setRunningUI(true);
+    tick();
+  } else {
+    els.amount.textContent = money(0);
+  }
+
+  // Catch right back up after a screen-lock or tab switch.
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && running()) { cancelAnimationFrame(raf); tick(); }
+  });
+</script>
+</body>
+</html>

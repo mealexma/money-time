@@ -267,10 +267,10 @@
   let raf = null;
 
   function load() {
-    try { return JSON.parse(sessionStorage.getItem(KEY)) || {}; }
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
     catch { return {}; }
   }
-  function save() { try { sessionStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
 
   function fmtMoney(n) {
     return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });

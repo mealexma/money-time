@@ -30,8 +30,9 @@ a boring meeting. (Built for my wife.)
   Reset zeroes everything. Pause logic uses `state.accumulated` + `state.startedAt`.
 - **Mobile-first**, fullscreen when added to an iPhone home screen (apple-mobile-web-app
   meta tags, safe-area padding, no scroll bounce).
-- **Storage:** temporary `sessionStorage` only — survives screen-lock/reload, forgotten
-  when the tab/app closes. Intentionally no long-term saving.
+- **Storage:** `localStorage` — the start time + accumulated total persist across tab
+  close, browser restart, and reboot. On reopen the ticker catches up to where it would
+  have been (it's just elapsed-time math). Per-browser/device; Reset clears it.
 
 ## How to edit & redeploy
 
